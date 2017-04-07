@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from selenium import webdriver
 import time
+import data_insert
 from spammer import spam
 from selenium.common.exceptions import NoSuchElementException
 import config
@@ -24,6 +25,20 @@ def main():
         order_all.click()
         print('Start grabbing')
 
+    def get_info():
+        login()
+        for i in range(1, 15):
+            try:
+                email = driver.find_element_by_id('email_lbl').text
+                car = driver.find_element_by_tag_name('strong').text
+                detail = driver.find_element_by_class_name('list').text
+                data_insert.connect(detail, car, email)
+                nav()
+                time.sleep(2)
+            except NoSuchElementException:
+                time.sleep(2)
+                nav()
+        driver.close()
 
     def nav():
         navigation = driver.find_element_by_class_name("dotarrow-right-icon")
