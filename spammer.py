@@ -36,3 +36,30 @@ def sendmail(target):
     mail.login(me, config.email_pass)
     mail.sendmail(me, target, msg.as_string())
     mail.quit()
+
+
+def spam():
+    conn = sqlite3.connect('base.db')
+    dtime ='%s-%s-%s' % (datetime.datetime.now().year, datetime.datetime.now().month, datetime.datetime.now().day)
+    c = conn.cursor()
+    #c.execute(""" drop TABLE sbase""")
+    #c.execute("""CREATE TABLE sbase (ID INTEGER PRIMARY KEY   AUTOINCREMENT, detail VARCHAR NOT NULL, car VARCHAR NOT NULL, email VARCHAR UNIQUE, status VARCHAR DEFAULT waiting, date datetime)""")
+
+    def status_updater(identifier):
+        dtime = datetime.datetime.now()
+        #c.execute(""" drop TABLE sbase""")
+        #c.execute("""CREATE TABLE sbase (ID INTEGER PRIMARY KEY   AUTOINCREMENT, detail VARCHAR NOT NULL, car VARCHAR NOT NULL, email VARCHAR UNIQUE, status VARCHAR DEFAULT waiting, date datetime)""")
+        try:
+            c.execute("""UPDATE sbase SET status = 'send' WHERE ID = (?) """, (identifier,))
+        except:
+            print("Error has been occurred")
+
+    c.execute("""SELECT ID, detail, email FROM sbase WHERE status = 'waiting' AND date = (?) """, (dtime,))
+    data = c.fetchall()
+    for a, b, s in data:
+        sendmail(s)
+        print('Message has been send to %s' % s)
+        status_updater(a)
+        print('Database record updated id: %s' % a)
+    conn.commit()
+    c.close()
